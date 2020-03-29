@@ -1,0 +1,20 @@
+soil-sensors-with-wifi/arduino_secrets.h
+
+.idea
+.env
+.env.test
+wallaby.js
+dump.rdb
+.env.my
+.env.production
+.env.staging
+
+# node libraries
+node_modules
+
+# osx noise
+.DS_Store
+npm-debug.log
+newrelic_agent.log
+
+notes.txt

@@ -10,9 +10,6 @@
 
   - Moisture sensor
     Power supply: 3.3-5v
-
-  - Water level
-    Power supply: 3.3-5v
 */
 
 
@@ -36,7 +33,6 @@ char observationRoute[] = "/hydroponics";
 WiFiClient client;
 
 const int SOIL_MOISTURE_SENSOR_PIN = A0;
-const int WATER_LEVEL_SENSOR_PIN = A5;
 
 const int dry = 520;
 const int wet = 270;
@@ -71,19 +67,16 @@ void mainLoop() {
   float temperature = getTemperature();
   float humidity = getHumidity();
   long soilMoisture = analogRead(SOIL_MOISTURE_SENSOR_PIN);
-  long waterLevel = analogRead(WATER_LEVEL_SENSOR_PIN);
-  Serial.println("Water level: " + String(convertWaterLevelResistanceToIn(waterLevel)) + "in, " + waterLevel);
   Serial.println("Soil Moisture: " + readableSoilMoisture(soilMoisture) + ", " + soilMoisture);
   Serial.println("Temperature: " + String(temperature) + " *F");
   Serial.println("Humidity: " + String(humidity) + " %");
     
   if (millis() - lastRecordTime > recordIntervals) {
-    // int deviceId, float temperature, float ph, float humidity, float conductivity
-    String data = createObservationJson(deviceId, temperature, 0, humidity, soilMoisture, waterLevel);
+    // int deviceId, float temperature, float ph, float humidity, float 
+    String data = createObservationJson(deviceId, temperature, 0, humidity, soilMoisture, 0);
     postObservation(data);
     lastRecordTime = millis();
   }
-
 
   delay(sensorReadIntervals);
 }
@@ -118,8 +111,7 @@ void initWifi() {
 
   // you're connected now, so print out the data:
   Serial.print("You're connected to the network");
-  printCurrentNet();
-  printWifiData();
+  printWifiStatus();
 }
 
 String readableSoilMoisture(int soilMoisture){
@@ -134,14 +126,6 @@ String readableSoilMoisture(int soilMoisture){
   } else {
     return "Air";
   }
-}
-
-// Convert waterLevel resistance to inches
-int convertWaterLevelResistanceToIn(int waterLevel) {
-  //  x = (y - b) / m
-  int b = 511;
-  int m = 15;
-  return (waterLevel - 511) / 15;
 }
 
 float getTemperature() {
@@ -161,54 +145,21 @@ float getHumidity() {
   return humidity;
 }
 
-void printWifiData() {
-  // print your board's IP address:
-  IPAddress ip = WiFi.localIP();
-  Serial.print("IP Address: ");
-  Serial.println(ip);
-  Serial.println(ip);
-
-  // print your MAC address:
-  byte mac[6];
-  WiFi.macAddress(mac);
-  Serial.print("MAC address: ");
-  printMacAddress(mac);
-}
-
-void printCurrentNet() {
+void printWifiStatus() {
   // print the SSID of the network you're attached to:
   Serial.print("SSID: ");
   Serial.println(WiFi.SSID());
 
-  // print the MAC address of the router you're attached to:
-  byte bssid[6];
-  WiFi.BSSID(bssid);
-  Serial.print("BSSID: ");
-  printMacAddress(bssid);
+  // print your board's IP address:
+  IPAddress ip = WiFi.localIP();
+  Serial.print("IP Address: ");
+  Serial.println(ip);
 
   // print the received signal strength:
   long rssi = WiFi.RSSI();
   Serial.print("signal strength (RSSI):");
-  Serial.println(rssi);
-
-  // print the encryption type:
-  byte encryption = WiFi.encryptionType();
-  Serial.print("Encryption Type:");
-  Serial.println(encryption, HEX);
-  Serial.println();
-}
-
-void printMacAddress(byte mac[]) {
-  for (int i = 5; i >= 0; i--) {
-    if (mac[i] < 16) {
-      Serial.print("0");
-    }
-    Serial.print(mac[i], HEX);
-    if (i > 0) {
-      Serial.print(":");
-    }
-  }
-  Serial.println();
+  Serial.print(rssi);
+  Serial.println(" dBm");
 }
 
 void postObservation(String data) {
@@ -233,7 +184,7 @@ void postObservation(String data) {
   }
 }
 
-String createObservationJson(int deviceId, float temperature, float ph, float humidity, float conductivity, float waterLevel) {
+String createObservationJson(int deviceId, float temperature, float ph, float humidity, float soilmoisture, float waterLevel) {
   String data = "";
   if (deviceId) {
     data += "DeviceId=" + String(deviceId) + "&";
@@ -247,8 +198,8 @@ String createObservationJson(int deviceId, float temperature, float ph, float hu
   if (humidity) {
     data += "humidity=" + String(humidity) + "&";
   }
-  if (conductivity) {
-    data += "conductivity=" + String(conductivity) + "&";
+  if (soilmoisture) {
+    data += "soilmoisture=" + String(soilmoisture) + "&";
   }
   if (waterLevel) {
     data += "waterlevel=" + String(waterLevel) + "&";

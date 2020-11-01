@@ -36,7 +36,9 @@ Servo waterPump;
 const int WATER_PUMP_PIN = 9;
 // analog input pin
 const int PH_SENSOR_PIN = 0;
+// dose solution for 2 seconds
 const int doseDuration = 2000;
+// wait 5 seconds before reading pH again
 const int sensorReadInterval = 5000;
 
 // Change to your desired pH
@@ -66,7 +68,7 @@ void mainLoop() {
   if (ph < phTarget) {
     if (ph < phTarget - phToleration) {
       // start to raise the pH
-      Serial.println("pH lower then target, begining to raise acidity");
+      Serial.println("pH lower than target, beginning to raise acidity");
       isDosing = true;
     }
     if (isDosing) {

@@ -29,7 +29,7 @@ int status = WL_IDLE_STATUS;     // the Wifi radio's status
 // NOTE: change to your own server
 char server[] = "hydroponics-monitor.herokuapp.com";  
 char observationRoute[] = "/hydroponics";
-// NOTE: use WiFiSSLClient if connecting to https
+// NOTE: use WiFiSSLClient if connecting to https and WiFiClient if http
 WiFiClient client;
 
 const int SOIL_MOISTURE_SENSOR_PIN = A0;

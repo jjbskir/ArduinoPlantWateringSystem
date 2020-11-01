@@ -1,5 +1,5 @@
 /**
-  PH Regulator
+  pH Regulator
   @auther Jeremy Bohrer
   @github https://github.com/jjbskir
   
@@ -20,6 +20,11 @@
     https://wiki.dfrobot.com/PH_meter_SKU__SEN0161_
     Power supply: 3.3-5v
     Interface: Black GND; Red 5V; Blue: analog 
+    * Calibration:
+    * 1) Put the pH sensor in 7.00 pH calibration liquid.
+    * 2) Uncomment phCalibration() and upload the sketch.
+    * 3) Update const phOffset with the result. 
+    * 4) Put the pH sensor in 4.00 pH calibration liquid and let the value stabilize. 
 */
 
 // setup peristaltic pump
@@ -34,19 +39,14 @@ const int PH_SENSOR_PIN = 0;
 const int doseDuration = 2000;
 const int sensorReadInterval = 5000;
 
-// OPTIMIZE: how dry to start watering and for how long.
+// Change to your desired pH
 const float phTarget = 7;
 const float phToleration = 0.25;
+// Calibrate your pH sensor in 7.0 solution. 
+// The difference 7.0 and the pH read is your offset. 
+// More instructions can be found in the wiki
+const float phOffset = 0.00;
 boolean isDosing = false;
-
-
-/***********Notice and Trouble shooting***************
- * Pump rate with tubing around 30ml/min
- * Docs say: 85ml/min
-0   -> clockwise maximum speed rotation
-90  -> stop
-180 -> counterclockwise maximum speed rotation
-****************************************************/
 
 void setup() {
   Serial.begin(9600);
@@ -56,6 +56,7 @@ void setup() {
 
 void loop() {     
   mainLoop();
+//  phCalibration();
 }
 
 void mainLoop() {
@@ -75,6 +76,13 @@ void mainLoop() {
     isDosing = false;
   }
   
+  delay(sensorReadInterval);
+}
+
+void phCalibration() {
+  float ph = getPh();
+  Serial.println("pH: " + String(ph));
+  Serial.println("Change pH offset to: " + String(7.00 - ph - phOffset));
   delay(sensorReadInterval);
 }
 
@@ -121,6 +129,6 @@ float getPh() {
   for(int i=2;i<8;i++)                      //take the average value of 6 center sample
     avgValue+=buf[i];
   float phValue=(float)avgValue*5.0/1024/6; //convert the analog into millivolt
-  phValue=3.5*phValue;                      //convert the millivolt into pH value
+  phValue=3.5*phValue+phOffset;                      //convert the millivolt into pH value
   return phValue;
 }

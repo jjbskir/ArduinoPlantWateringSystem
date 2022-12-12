@@ -13,7 +13,7 @@
     "body-parser": "^1.17.1",
     "compression": "^1.6.2",
     "debug": "^4.1.1",
-    "express": "^4.15.2",
+    "express": "^4.17.3",
     "pg": "^7.18.2",
     "sequelize": "^5.21.5"
   },
